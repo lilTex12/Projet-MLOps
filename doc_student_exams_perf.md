@@ -12,6 +12,7 @@ C : ~21,8 %
 F : ~22,6 %
 B : ~13,2 %
 A : ~7,5 %
+- dernier update : 23 days ago
 
 💬Mots clés : éducation, étudiants, performance académique, examens, réussite, bien-être, stress, notes ... 
 
