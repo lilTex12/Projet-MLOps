@@ -51,5 +51,6 @@ internet_access, device_availability, educational_app_usage, online_course_hours
 exam_score, performance_grade, pass_status, performance_level
 
 
+Lien vers le dataset : [https://www.kaggle.com/datasets/mobeenfatimah/student-exam-performance-and-success-dataset?resource=download](https://www.kaggle.com/datasets/mobeenfatimah/student-exam-performance-and-success-dataset)
 Tout droits réservés @mobeenfatimah / Mobeen Fatima
 
