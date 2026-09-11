@@ -1,8 +1,8 @@
-Dataset de Performance aux Examens et de Réussite Académique des Étudiants
+# Dataset de Performance aux Examens et de Réussite Académique des Étudiants
 
 Ce dataset présente croise les habitudes d'études, les modes de vies, le bien-être et les facteurs académiques pour prédire la réussite aux examens de 100 000 étudiants.
 
-❓Quelques informations : 
+## Quelques informations : 
 - 100 000 étudiants uniques (aucun doublon)
 - 44 variables
 - Taux de réussite global : ~77,4 %
@@ -22,7 +22,7 @@ Plusieurs variables cibles possibles pour des modèles de régression ou de clas
 - performance_grade (Catégorielle multi-classes) : Notes lettrées standards (A, B, C, D, F) basées sur une distribution académique réaliste (~77 % de réussite).
 - performance_level (Catégorielle multi-classes) : Catégories de performance (High, Medium, Low).
 
-Détails des variables 
+## Détails des variables 
 
 44 variables réparties en 6 thèmes :
 
@@ -51,6 +51,7 @@ internet_access, device_availability, educational_app_usage, online_course_hours
 exam_score, performance_grade, pass_status, performance_level
 
 
+## Infos accès au dataset 
 Lien vers le dataset : [https://www.kaggle.com/datasets/mobeenfatimah/student-exam-performance-and-success-dataset?resource=download](https://www.kaggle.com/datasets/mobeenfatimah/student-exam-performance-and-success-dataset)
 Tout droits réservés @mobeenfatimah / Mobeen Fatima
 
