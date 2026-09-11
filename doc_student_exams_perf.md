@@ -52,4 +52,3 @@ exam_score, performance_grade, pass_status, performance_level
 
 Tout droits réservés @mobeenfatimah / Mobeen Fatima
 
-Mobeen Fatima — @mobeenfatimah
