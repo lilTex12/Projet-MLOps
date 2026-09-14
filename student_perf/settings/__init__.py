@@ -1,0 +1,7 @@
+from student_perf.settings.base import (
+    REGLES_BORNES_THEORIQUES,
+    DICT_VAR_QUALI_ORDINAL,
+    CHEMIN_DATA_RAW,
+)
+
+__all__ = ["REGLES_BORNES_THEORIQUES", "DICT_VAR_QUALI_ORDINAL", "CHEMIN_DATA_RAW"]
