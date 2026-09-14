@@ -1,9 +1,5 @@
 """
 Fonctions liées à la préparation des données pour la modélisation.
-
-C'est ici que tu ajouteras aussi tes futures fonctions d'entraînement de
-modèle "pures" (ex: `entrainer_modele(X_train, y_train, params) -> model`),
-que `application/train.py` viendra orchestrer avec MLflow.
 """
 import pandas as pd
 from sklearn.model_selection import train_test_split
