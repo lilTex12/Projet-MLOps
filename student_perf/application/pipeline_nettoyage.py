@@ -1,5 +1,10 @@
 """
-Ce module appelle uniquement les fonctions de `domain/` et `infrastructure/`, il permet d'obtenir le jeu de données final
+Orchestration du pipeline de nettoyage complet.
+
+Ce module ne contient AUCUNE logique métier lui-même : il appelle uniquement
+les fonctions de `domain/` et `infrastructure/`, dans le même ordre que le
+notebook Colab d'origine (section "Nettoyage"). C'est le fichier que tu
+exécutes pour reproduire le jeu de données final.
 
 Usage :
     python -m student_perf.application.pipeline_nettoyage
@@ -23,6 +28,7 @@ from student_perf.settings.base import (
 def nettoyer_donnees_brutes(df: pd.DataFrame) -> pd.DataFrame:
     """
     Étape 1 : suppression des colonnes inutiles + vérification des bornes.
+    Reproduit les cellules 31-37 du notebook.
     """
     df = suppr_cols(df, ['student_id'])
 
@@ -39,6 +45,15 @@ def preparer_jeu_donnees(
     variables_reinjectees: list[str],
     variables_a_supprimer: list[str],
 ) -> pd.DataFrame:
+    """
+    Étape générique reproduisant les cellules 51 et 55 du notebook :
+    supprime les individus dont les variables importantes sont nulles,
+    retire les variables non significatives, puis encode le reste.
+
+    Utilisée séparément pour construire df_status (cible=pass_status)
+    et df_score (cible=exam_score), avec les mêmes paramètres qu'utilisés
+    dans le notebook.
+    """
     df_prepare = supression_individus_var_null(df, variables_reinjectees)
     df_prepare = suppr_cols(df_prepare, variables_a_supprimer)
 
@@ -54,6 +69,10 @@ def preparer_jeu_donnees(
 
 
 def run_pipeline(df_brut: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    """
+    Exécute le pipeline complet et retourne les deux jeux de données finaux,
+    exactement comme le notebook (df_status et df_score).
+    """
     df = nettoyer_donnees_brutes(df_brut)
 
     # Colonnes réinjectées / supprimées identifiées dans le notebook

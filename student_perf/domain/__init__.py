@@ -13,7 +13,12 @@ from student_perf.domain.analyse import (
     correlation_variable_exam_score,
     analyser_correlations_mixtes,
 )
-from student_perf.domain.modelisation import separer_train_test
+from student_perf.domain.modelisation import (
+    separer_train_test, 
+    random_forest_classifier,
+    random_forest_regressor,
+)
+from student_perf.domain.evaluation import evaluation_modele_classifier
 
 __all__ = [
     "identification_valeurs_null",
@@ -28,4 +33,7 @@ __all__ = [
     "correlation_variable_exam_score",
     "analyser_correlations_mixtes",
     "separer_train_test",
+    "random_forest_classifier",
+    "random_forest_regressor",
+    "evaluation_modele_classifier",
 ]

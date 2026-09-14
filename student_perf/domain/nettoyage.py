@@ -1,5 +1,9 @@
 """
 Fonctions de nettoyage du jeu de données.
+
+Fonctions pures : elles prennent un DataFrame (+ paramètres) et retournent
+un DataFrame, sans jamais lire ou écrire de fichier. C'est ce qui les rend
+faciles à tester unitairement (cf. tests/unit_tests/domain/test_nettoyage.py).
 """
 import pandas as pd
 
