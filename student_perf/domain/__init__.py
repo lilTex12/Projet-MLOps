@@ -18,6 +18,8 @@ from student_perf.domain.modelisation import (
     separer_train_test_regressor,
     random_forest_classifier,
     random_forest_regressor,
+    gradient_boosting_classifier,
+    gradient_boosting_regressor,
 )
 from student_perf.domain.evaluation import (
     evaluation_modele_classifier,
@@ -42,6 +44,8 @@ __all__ = [
     "separer_train_test_regressor",
     "random_forest_classifier",
     "random_forest_regressor",
+    "gradient_boosting_classifier",
+    "gradient_boosting_regressor",
     "evaluation_modele_classifier",
     "evaluation_modele_regressor",
     "feature_importances_model",
