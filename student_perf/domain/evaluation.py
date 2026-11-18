@@ -1,37 +1,23 @@
 """
 Fonctions d'évaluation des modèles entraînés.
 """
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    roc_auc_score,
-    confusion_matrix,
-    mean_absolute_error,
-    mean_squared_error,
-    r2_score,
-)
+from scipy.stats import chi2_contingency
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, confusion_matrix
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import shap
 
-try:
-    import shap
-except ImportError:
-    shap = None
-
-
-
-def evaluation_modele_classifier(y_test: list, y_pred: list) -> tuple[float, float, float, list]:
+def evaluation_modele_classifier(   y_test: list,   y_pred: list) -> tuple[float, float, float, list]:
     """
     Calcule et affiche les métriques d'évaluation d'un modèle classifier.
 
+
     Paramètres
     ----------
-    y_test : list
+    y_test : llist
         La variable cible réelle (jeu de test).
     y_pred : list
         Les prédictions de classes effectuées par le modèle.
+
 
     Retours
     -------
@@ -43,6 +29,7 @@ def evaluation_modele_classifier(y_test: list, y_pred: list) -> tuple[float, flo
     f1 = f1_score(y_test, y_pred, average='binary')
     cfm = confusion_matrix(y_test, y_pred)
 
+
     print("--- ÉVALUATION DU CLASSIFIEUR ---")
     print("L'accuracy est de :", accuracy)
     print("L'AUC est de :", auc)
@@ -50,8 +37,8 @@ def evaluation_modele_classifier(y_test: list, y_pred: list) -> tuple[float, flo
     print("La matrice de confusion :")
     print(cfm)
 
-    return accuracy, auc, f1, cfm
 
+    return accuracy, auc, f1, cfm
 
 def evaluation_modele_regressor(
     y_test: list | pd.Series | np.ndarray,
@@ -83,9 +70,8 @@ def evaluation_modele_regressor(
     print(f"Le coefficient de détermination R² est de : {r2:.4f}")
 
     return mae, mse, rmse, r2
-
-
-def feature_importances_model(model, X_train: pd.DataFrame, y_train: list | pd.Series) -> pd.DataFrame:
+    
+ def feature_importances_model(model, X_train: pd.DataFrame, y_train: list | pd.Series) -> pd.DataFrame :
     """Affiche un graphique en barres de l'importance des variables d'un modèle.
 
     Cette fonction extrait l'attribut `feature_importances_` d'un modèle entraîné
@@ -142,9 +128,8 @@ def feature_importances_model(model, X_train: pd.DataFrame, y_train: list | pd.S
     plt.show()
 
     return features_importance_df
-
-
-def shape_modele_status(mod, X_test: pd.DataFrame) -> None:
+ 
+ def shape_modele_status(mod, X_test: pd.DataFrame) -> None:
     """Affiche un graphique Beeswarm (Summary Plot) des valeurs SHAP pour évaluer l'impact des variables.
 
     Paramètres
@@ -160,11 +145,8 @@ def shape_modele_status(mod, X_test: pd.DataFrame) -> None:
     -------
     None
         Affiche directement le graphique SHAP Beeswarm dans l'environnement d'exécution.
+
     """
-    if shap is None:
-        raise ImportError(
-            "Le package 'shap' n'est pas installé. Installe-le avec : pip install shap"
-        )
 
     explainer = shap.TreeExplainer(mod)
     explanation = explainer(X_test)
@@ -174,4 +156,28 @@ def shape_modele_status(mod, X_test: pd.DataFrame) -> None:
         explanation_class1 = explanation
 
     shap.plots.beeswarm(explanation_class1)
+    
+ def shap_modele_examen_score(mod, X_test: pd.DataFrame, max_display: int = 10) -> None:
+    """Affiche un graphique Beeswarm (Summary Plot) des valeurs SHAP
+    pour un modèle de régression.
 
+    Paramètres
+    ----------
+    mod : BaseEstimator
+        Modèle de régression entraîné
+    X_test : pd.DataFrame
+        DataFrame de test contenant les variables explicatives.
+    max_display : int, default=10
+        Nombre maximal de variables principales à afficher sur le graphique.
+    """
+
+    explainer = shap.TreeExplainer(mod)
+    explanation = explainer(X_test)
+
+
+    if len(explanation.shape) == 3:
+        explanation = explanation[:, :, 1]
+
+    shap.plots.beeswarm(explanation, max_display=max_display)
+
+  

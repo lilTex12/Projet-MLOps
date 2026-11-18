@@ -6,17 +6,13 @@ modèle "pures" (ex: `entrainer_modele(X_train, y_train, params) -> model`),
 que `application/train.py` viendra orchestrer avec MLflow.
 """
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.ensemble import (
-    RandomForestClassifier,
-    RandomForestRegressor,
-    GradientBoostingClassifier,
-    GradientBoostingRegressor,
-)
-from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
-
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.utils.class_weight import compute_sample_weight
 
 def separer_train_test(
     df: pd.DataFrame,
@@ -74,9 +70,9 @@ def separer_train_test(
     )
 
     return X_train, X_test, y_train, y_test
-
-
-def separer_train_test_regressor(
+    
+    
+ def separer_train_test_regressor(
     df: pd.DataFrame,
     variable_cible: str,
     proportion_test: float = 0.2,
@@ -84,6 +80,7 @@ def separer_train_test_regressor(
     stratifier: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """Sépare un DataFrame en jeux de données d'entraînement et de test pour un modèle de régression ou de classification.
+
 
     Paramètres
     ----------
@@ -153,9 +150,8 @@ def separer_train_test_regressor(
     )
 
     return X_train, X_test, y_train, y_test
-
-
-def random_forest_classifier(
+    
+ def random_forest_classifier(
     X_train: pd.DataFrame,
     y_train: list,
     X_test: pd.DataFrame,
@@ -190,12 +186,15 @@ def random_forest_classifier(
         ses meilleurs paramètres et un tableau NumPy avec les prédictions sur
         le jeu de test.
     """
+
+    # 1. Définition de la grille d'hyperparamètres
     param_grid = {
         "n_estimators": n_estimators_list,
         "max_depth": max_depth_list,
     }
 
-    rf_base = RandomForestClassifier(random_state=42)
+    # 2. Recherche par grille avec Validation Croisée sur X_train
+    rf_base = RandomForestClassifier(class_weight='balanced' , random_state=42)
     grid_search = GridSearchCV(
         estimator=rf_base,
         param_grid=param_grid,
@@ -203,18 +202,26 @@ def random_forest_classifier(
         scoring="accuracy",
         n_jobs=-1,
     )
+
     grid_search.fit(X_train, y_train)
 
+    # Récupération du meilleur modèle entraîné
     best_mod = grid_search.best_estimator_
     best_params = grid_search.best_params_
 
+    # 3. Graphique des résultats de la validation croisée
     scores_matrix = grid_search.cv_results_["mean_test_score"].reshape(
         len(max_depth_list), len(n_estimators_list)
     )
 
     plt.figure(figsize=(8, 5))
     for i, depth in enumerate(max_depth_list):
-        plt.plot(n_estimators_list, scores_matrix[i, :], label=f"max_depth = {depth}")
+        plt.plot(
+            n_estimators_list,
+            scores_matrix[i, :],
+            label=f"max_depth = {depth}",
+        )
+
     plt.xlabel("n_estimators")
     plt.ylabel("Score Moyen (Accuracy CV)")
     plt.title("Variation du score en fonction de n_estimators et max_depth")
@@ -222,15 +229,16 @@ def random_forest_classifier(
     plt.grid(True)
     plt.show()
 
+    # 4. Évaluation finale sur l'ensemble de TEST
     y_pred = best_mod.predict(X_test)
 
+    # 5. Affichage des résultats
     print("--- RÉSULTATS DE L'OPTIMISATION ---")
     print("Meilleurs paramètres trouvés :", best_params)
 
     return best_mod, best_params, y_pred
-
-
-def random_forest_regressor(
+    
+ def random_forest_regressor(
     X_train: pd.DataFrame,
     y_train: list,
     X_test: pd.DataFrame,
@@ -265,11 +273,13 @@ def random_forest_regressor(
         ses meilleurs paramètres et une liste avec les prédictions sur le jeu
         de test.
     """
+    # 1. Définition de la grille d'hyperparamètres
     param_grid = {
         "n_estimators": n_estimators_list,
         "max_depth": max_depth_list,
     }
 
+    # 2. Recherche par grille avec Validation Croisée sur X_train (scoring='r2')
     rf_base = RandomForestRegressor(random_state=42)
     grid_search = GridSearchCV(
         estimator=rf_base,
@@ -278,18 +288,26 @@ def random_forest_regressor(
         scoring="r2",
         n_jobs=-1,
     )
+
     grid_search.fit(X_train, y_train)
 
+    # Récupération du meilleur modèle entraîné
     best_mod = grid_search.best_estimator_
     best_params = grid_search.best_params_
 
+    # 3. Graphique des résultats de la validation croisée
     scores_matrix = grid_search.cv_results_["mean_test_score"].reshape(
         len(max_depth_list), len(n_estimators_list)
     )
 
     plt.figure(figsize=(8, 5))
     for i, depth in enumerate(max_depth_list):
-        plt.plot(n_estimators_list, scores_matrix[i, :], label=f"max_depth = {depth}")
+        plt.plot(
+            n_estimators_list,
+            scores_matrix[i, :],
+            label=f"max_depth = {depth}",
+        )
+
     plt.xlabel("n_estimators")
     plt.ylabel("Score Moyen ($R^2$ CV)")
     plt.title("Variation du score en fonction de n_estimators et max_depth")
@@ -297,17 +315,20 @@ def random_forest_regressor(
     plt.grid(True)
     plt.show()
 
+    # 4. Évaluation finale sur l'ensemble de TEST
     y_pred = best_mod.predict(X_test)
 
+    # 5. Affichage des résultats
     print("--- RÉSULTATS DE L'OPTIMISATION ---")
     print("Meilleurs paramètres trouvés :", best_params)
     print(f"R² sur le jeu de test : {r2_score(y_test, y_pred):.4f}")
-    print(f"RMSE sur le jeu de test : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
+    print(
+        f"RMSE sur le jeu de test : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}"
+    )
 
     return best_mod, best_params, y_pred.tolist()
-
-
-def gradient_boosting_regressor(
+    
+ def gradient_boosting_regressor(
     X_train: pd.DataFrame,
     y_train: list,
     X_test: pd.DataFrame,
@@ -345,12 +366,14 @@ def gradient_boosting_regressor(
         ses meilleurs paramètres et une liste avec les prédictions sur le jeu
         de test.
     """
+    # 1. Définition de la grille d'hyperparamètres
     param_grid = {
         "n_estimators": n_estimators_list,
         "learning_rate": learning_rate_list,
         "max_depth": max_depth_list,
     }
 
+    # 2. Recherche par grille avec Validation Croisée sur X_train (scoring='r2')
     gb_base = GradientBoostingRegressor(random_state=42)
     grid_search = GridSearchCV(
         estimator=gb_base,
@@ -359,11 +382,15 @@ def gradient_boosting_regressor(
         scoring="r2",
         n_jobs=-1,
     )
+
     grid_search.fit(X_train, y_train)
 
+    # Récupération du meilleur modèle entraîné
     best_mod = grid_search.best_estimator_
     best_params = grid_search.best_params_
 
+    # 3. Graphique des résultats de la validation croisée
+    # Représentation matricielle en (max_depth, learning_rate, n_estimators)
     scores_matrix = grid_search.cv_results_["mean_test_score"].reshape(
         len(max_depth_list), len(learning_rate_list), len(n_estimators_list)
     )
@@ -376,6 +403,7 @@ def gradient_boosting_regressor(
                 scores_matrix[i, j, :],
                 label=f"depth={depth}, lr={lr}",
             )
+
     plt.xlabel("n_estimators")
     plt.ylabel("Score Moyen ($R^2$ CV)")
     plt.title("Variation du score en fonction des hyperparamètres du Gradient Boosting")
@@ -384,16 +412,19 @@ def gradient_boosting_regressor(
     plt.tight_layout()
     plt.show()
 
+    # 4. Évaluation finale sur l'ensemble de TEST
     y_pred = best_mod.predict(X_test)
 
+    # 5. Affichage des résultats
     print("--- RÉSULTATS DE L'OPTIMISATION ---")
     print("Meilleurs paramètres trouvés :", best_params)
     print(f"R² sur le jeu de test : {r2_score(y_test, y_pred):.4f}")
-    print(f"RMSE sur le jeu de test : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}")
+    print(
+        f"RMSE sur le jeu de test : {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}"
+    )
 
     return best_mod, best_params, y_pred.tolist()
-
-
+ 
 def gradient_boosting_classifier(
     X_train: pd.DataFrame,
     y_train: list,
@@ -432,13 +463,19 @@ def gradient_boosting_classifier(
         ses meilleurs paramètres et un tableau NumPy avec les prédictions sur
         le jeu de test.
     """
+
+    # 1. Définition de la grille d'hyperparamètres
     param_grid = {
         "n_estimators": n_estimators_list,
         "learning_rate": learning_rate_list,
         "max_depth": max_depth_list,
     }
 
-    gb_base = GradientBoostingClassifier(random_state=42)
+    #Equilibre du modèle
+    sample_weights = compute_sample_weight("balanced", y_train)
+
+    # 2. Recherche par grille avec Validation Croisée sur X_train
+    gb_base = GradientBoostingClassifier( random_state=42)
     grid_search = GridSearchCV(
         estimator=gb_base,
         param_grid=param_grid,
@@ -446,11 +483,14 @@ def gradient_boosting_classifier(
         scoring="accuracy",
         n_jobs=-1,
     )
-    grid_search.fit(X_train, y_train)
 
+    grid_search.fit(X_train, y_train, sample_weight=sample_weights)
+
+    # Récupération du meilleur modèle entraîné
     best_mod = grid_search.best_estimator_
     best_params = grid_search.best_params_
 
+    # 3. Graphique des résultats de la validation croisée
     scores_matrix = grid_search.cv_results_["mean_test_score"].reshape(
         len(max_depth_list), len(learning_rate_list), len(n_estimators_list)
     )
@@ -463,6 +503,7 @@ def gradient_boosting_classifier(
                 scores_matrix[i, j, :],
                 label=f"depth={depth}, lr={lr}",
             )
+
     plt.xlabel("n_estimators")
     plt.ylabel("Score Moyen (Accuracy CV)")
     plt.title("Variation de l'Accuracy en fonction des hyperparamètres du Boosting")
@@ -471,12 +512,13 @@ def gradient_boosting_classifier(
     plt.tight_layout()
     plt.show()
 
+    # 4. Évaluation finale sur l'ensemble de TEST
     y_pred = best_mod.predict(X_test)
 
+    # 5. Affichage des résultats
     print("--- RÉSULTATS DE L'OPTIMISATION ---")
     print("Meilleurs paramètres trouvés :", best_params)
     print(f"Accuracy sur le jeu de test : {accuracy_score(y_test, y_pred):.4f}")
 
     return best_mod, best_params, y_pred
-
-
+ 
