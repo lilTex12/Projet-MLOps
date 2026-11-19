@@ -7,6 +7,9 @@ appeler ces fonctions puis tracer lui-même les résultats.
 """
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
 from scipy.stats import chi2_contingency
 
 
@@ -173,3 +176,220 @@ def analyser_correlations_mixtes(
         "qualitative_qualitative": matrice_qual_qual,
         "numerique_qualitative": matrice_num_qual
     }
+
+def graphique_score_selon_mesure(df: pd.DataFrame, mesure: str | None = None, variable_cible: str = "exam_score", nb_classes: int = 5, decouper_quantitatives: bool = False
+) -> None:
+    """
+    Représente graphiquement la variable cible quantitative (ex: examen_score)
+    en fonction d'une ou plusieurs variables du DataFrame.
+
+    Paramètres
+    ----------
+    df : pd.DataFrame
+        Le DataFrame contenant les données.
+    mesure : str ou None, facultatif
+        Nom de la variable explicative. Si None, propose un choix interactif.
+        Si "toutes", génère tous les graphiques.
+    variable_cible : str, par défaut "examen_score"
+        Nom de la variable quantitative à analyser.
+    nb_classes : int, par défaut 5
+        Nombre d'intervalles si decouper_quantitatives=True.
+    decouper_quantitatives : bool, par défaut False
+        Si True, découpe les variables quantitatives en tranches (boxplot).
+        Si False, affiche un nuage de points avec régression linéaire.
+    """
+
+    # Vérification de la présence de la variable cible
+    if variable_cible not in df.columns:
+        raise ValueError(
+            f"La variable cible '{variable_cible}' n'existe pas dans le DataFrame."
+        )
+
+    # Suppression des lignes où la variable cible est absente
+    donnees = df.dropna(subset=[variable_cible]).copy()
+
+    # Liste des variables explicatives disponibles
+    variables_exclues = {variable_cible, "student_id"}
+    variables_disponibles = [
+        col for col in df.columns if col not in variables_exclues
+    ]
+
+    if not variables_disponibles:
+        raise ValueError("Aucune variable disponible pour l'analyse.")
+
+    # Choix interactif de la variable
+    if mesure is None:
+        print("Variables disponibles :\n")
+        for numero, colonne in enumerate(variables_disponibles, start=1):
+            print(f"{numero}. {colonne}")
+
+        choix = input(
+            "\nEntrez le numéro de la variable à analyser ou 'toutes' : "
+        )
+
+        if choix.lower() == "toutes":
+            mesure = "toutes"
+        else:
+            try:
+                numero = int(choix)
+                if numero < 1 or numero > len(variables_disponibles):
+                    raise ValueError
+                mesure = variables_disponibles[numero - 1]
+            except ValueError:
+                raise ValueError(
+                    "Choix invalide. Entrez un numéro valide ou 'toutes'."
+                )
+
+    # Vérification de la variable demandée
+    if mesure != "toutes" and mesure not in variables_disponibles:
+        raise ValueError(
+            f"La variable '{mesure}' n'existe pas ou ne peut pas être analysée."
+        )
+
+    # Variables à traiter
+    a_traiter = variables_disponibles if mesure == "toutes" else [mesure]
+
+    sns.set_theme(style="whitegrid")
+
+    for col in a_traiter:
+        plt.figure(figsize=(8, 5))
+
+        # Cas 1 : Variable explicative quantitative
+        if pd.api.types.is_numeric_dtype(donnees[col]):
+            if decouper_quantitatives:
+                # Groupement par tranches avec pd.cut
+                col_binned = f"{col}_tranches"
+                donnees[col_binned] = pd.cut(donnees[col], bins=nb_classes)
+                sns.boxplot(
+                    data=donnees,
+                    x=col_binned,
+                    y=variable_cible,
+                    color="#4c72b0"
+                )
+                plt.xticks(rotation=30)
+                plt.xlabel(f"{col} (par tranches)")
+            else:
+                # Scatterplot + droite de régression
+                sns.regplot(
+                    data=donnees,
+                    x=col,
+                    y=variable_cible,
+                    scatter_kws={"alpha": 0.6},
+                    line_kws={"color": "red"}
+                )
+                plt.xlabel(col)
+
+            plt.title(f"{variable_cible} en fonction de {col}")
+
+        # Cas 2 : Variable explicative qualitative
+        else:
+            sns.boxplot(
+                data=donnees,
+                x=col,
+                y=variable_cible,
+                color="#55a868"
+            )
+            plt.xticks(rotation=45 if donnees[col].nunique() > 5 else 0)
+            plt.title(f"Distribution de {variable_cible} selon {col}")
+            plt.xlabel(col)
+
+        plt.ylabel(variable_cible)
+        plt.tight_layout()
+        plt.show()
+
+def graphique_pass_selon_mesure(df: pd.DataFrame, mesure: str | None = None, variable_cible: str = "pass_status", nb_classes: int = 5
+) -> None:
+    """
+    Représente graphiquement le nombre d'étudiants ayant réussi ou échoué
+    selon une variable choisie.
+
+    Pour une variable qualitative, la fonction affiche le nombre de réussites
+    et d'échecs pour chaque catégorie.
+
+    Pour une variable quantitative, les valeurs sont regroupées en classes
+    afin de représenter le nombre de réussites et d'échecs par intervalle.
+
+    Paramètres
+    ----------
+    df : pd.DataFrame
+        Le DataFrame contenant les données des étudiants.
+
+    mesure : str ou None, facultatif
+        Nom de la variable à analyser.
+
+        - Si une variable est indiquée, un seul graphique est produit.
+        - Si mesure=None, l'utilisateur choisit une variable dans la liste.
+        - Si mesure="toutes", un graphique est produit pour toutes les variables
+          compatibles.
+
+    variable_cible : str, par défaut "pass_status"
+        Nom de la variable indiquant la réussite ou l'échec.
+
+    nb_classes : int, par défaut 5
+        Nombre de classes utilisées pour regrouper les variables quantitatives.
+
+    Retours
+    -------
+    None
+        La fonction affiche un ou plusieurs graphiques.
+    """
+
+    # Vérification de la présence de la variable cible
+    if variable_cible not in df.columns:
+        raise ValueError(
+            f"La variable cible '{variable_cible}' n'existe pas dans le DataFrame."
+        )
+
+    # Suppression des lignes où la variable cible est absente
+    donnees = df.dropna(subset=[variable_cible]).copy()
+
+    # Liste des variables disponibles
+    variables_exclues = {
+        variable_cible,
+        "student_id"
+    }
+
+    variables_disponibles = [
+        colonne for colonne in df.columns
+        if colonne not in variables_exclues
+    ]
+
+    if len(variables_disponibles) == 0:
+        raise ValueError("Aucune variable disponible pour l'analyse.")
+
+    # Choix de la variable par l'utilisateur
+    if mesure is None:
+        print("Variables disponibles :\n")
+
+        for numero, colonne in enumerate(variables_disponibles, start=1):
+            print(f"{numero}. {colonne}")
+
+        choix = input(
+            "\nEntrez le numéro de la variable à analyser "
+            "ou 'toutes' : "
+        )
+
+        if choix.lower() == "toutes":
+            mesure = "toutes"
+        else:
+            try:
+                numero = int(choix)
+
+                if numero < 1 or numero > len(variables_disponibles):
+                    raise ValueError
+
+                mesure = variables_disponibles[numero - 1]
+
+            except ValueError:
+                raise ValueError(
+                    "Choix invalide. Entrez un numéro valide ou 'toutes'."
+                )
+
+    # Vérification du nom de la variable
+    if mesure != "toutes" and mesure not in variables_disponibles:
+        raise ValueError(
+            f"La variable '{mesure}' n'existe pas ou ne peut pas être analysée."
+        )
+
+    # Configuration graphique
+    sns.set_theme(style="whitegrid")

@@ -6,6 +6,10 @@ modèle "pures" (ex: `entrainer_modele(X_train, y_train, params) -> model`),
 que `application/train.py` viendra orchestrer avec MLflow.
 """
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
@@ -13,6 +17,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.utils.class_weight import compute_sample_weight
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, confusion_matrix
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 def separer_train_test(
     df: pd.DataFrame,
@@ -72,7 +78,7 @@ def separer_train_test(
     return X_train, X_test, y_train, y_test
     
     
- def separer_train_test_regressor(
+def separer_train_test_regressor(
     df: pd.DataFrame,
     variable_cible: str,
     proportion_test: float = 0.2,
@@ -151,7 +157,7 @@ def separer_train_test(
 
     return X_train, X_test, y_train, y_test
     
- def random_forest_classifier(
+def random_forest_classifier(
     X_train: pd.DataFrame,
     y_train: list,
     X_test: pd.DataFrame,
@@ -238,7 +244,7 @@ def separer_train_test(
 
     return best_mod, best_params, y_pred
     
- def random_forest_regressor(
+def random_forest_regressor(
     X_train: pd.DataFrame,
     y_train: list,
     X_test: pd.DataFrame,
@@ -328,7 +334,7 @@ def separer_train_test(
 
     return best_mod, best_params, y_pred.tolist()
     
- def gradient_boosting_regressor(
+def gradient_boosting_regressor(
     X_train: pd.DataFrame,
     y_train: list,
     X_test: pd.DataFrame,

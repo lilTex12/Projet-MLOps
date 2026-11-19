@@ -5,6 +5,11 @@ from scipy.stats import chi2_contingency
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, confusion_matrix
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import shap
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
 
 def evaluation_modele_classifier(   y_test: list,   y_pred: list) -> tuple[float, float, float, list]:
     """
@@ -71,7 +76,7 @@ def evaluation_modele_regressor(
 
     return mae, mse, rmse, r2
     
- def feature_importances_model(model, X_train: pd.DataFrame, y_train: list | pd.Series) -> pd.DataFrame :
+def feature_importances_model(model, X_train: pd.DataFrame, y_train: list | pd.Series) -> pd.DataFrame :
     """Affiche un graphique en barres de l'importance des variables d'un modèle.
 
     Cette fonction extrait l'attribut `feature_importances_` d'un modèle entraîné
@@ -129,7 +134,7 @@ def evaluation_modele_regressor(
 
     return features_importance_df
  
- def shape_modele_status(mod, X_test: pd.DataFrame) -> None:
+def shape_modele_status(mod, X_test: pd.DataFrame) -> None:
     """Affiche un graphique Beeswarm (Summary Plot) des valeurs SHAP pour évaluer l'impact des variables.
 
     Paramètres
@@ -157,7 +162,7 @@ def evaluation_modele_regressor(
 
     shap.plots.beeswarm(explanation_class1)
     
- def shap_modele_examen_score(mod, X_test: pd.DataFrame, max_display: int = 10) -> None:
+def shap_modele_examen_score(mod, X_test: pd.DataFrame, max_display: int = 10) -> None:
     """Affiche un graphique Beeswarm (Summary Plot) des valeurs SHAP
     pour un modèle de régression.
 

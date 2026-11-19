@@ -5,6 +5,9 @@ from student_perf.infrastructure.extract import (
     charger_dataset_local,
 )
 
+import pandas as pd 
+import numpy as np
+
 
 
 def recuperer_dataset_kaggle(

@@ -10,6 +10,7 @@ import os
 
 import kagglehub
 import pandas as pd
+import numpy as np
 
 
 def telecharger_dataset_kaggle(dataset_id: str = "mobeenfatimah/student-exam-performance-and-success-dataset") -> str:

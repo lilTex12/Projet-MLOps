@@ -14,19 +14,11 @@ from student_perf.domain.analyse import (
     analyser_correlations_mixtes,
 )
 from student_perf.domain.modelisation import (
-    separer_train_test,
-    separer_train_test_regressor,
+    separer_train_test, 
     random_forest_classifier,
     random_forest_regressor,
-    gradient_boosting_classifier,
-    gradient_boosting_regressor,
 )
-from student_perf.domain.evaluation import (
-    evaluation_modele_classifier,
-    evaluation_modele_regressor,
-    feature_importances_model,
-    shape_modele_status,
-)
+from student_perf.domain.evaluation import evaluation_modele_classifier
 
 __all__ = [
     "identification_valeurs_null",
@@ -41,14 +33,7 @@ __all__ = [
     "correlation_variable_exam_score",
     "analyser_correlations_mixtes",
     "separer_train_test",
-    "separer_train_test_regressor",
     "random_forest_classifier",
     "random_forest_regressor",
-    "gradient_boosting_classifier",
-    "gradient_boosting_regressor",
     "evaluation_modele_classifier",
-    "evaluation_modele_regressor",
-    "feature_importances_model",
-    "shape_modele_status",
 ]
-
